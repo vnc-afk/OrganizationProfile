@@ -27,6 +27,39 @@ namespace OrganizationProfile
         {
             try
             {
+
+                long studentNo = StudentNumber(txtStudentNo.Text);
+                if (studentNo == -1) return;
+
+                string selectedProgram = cbPrograms.Text;
+                if (string.IsNullOrWhiteSpace(selectedProgram))
+                {
+                    MessageBox.Show("Please select a program.");
+                    return;
+                }
+
+                _FullName = FullName(txtLastName.Text, txtFirstName.Text, txtMiddleInitial.Text);
+                if (string.IsNullOrEmpty(_FullName)) return;
+
+                int age = Age(txtAge.Text);
+                if (age == -1) return;
+
+                if (datePickerBirthday.Value > DateTime.Today.AddYears(-15))
+                {
+                    MessageBox.Show("Birthday error ");
+                    return;
+                }
+
+                string selectedGender = cbGender.Text;
+                if (string.IsNullOrWhiteSpace(selectedGender))
+                {
+                    MessageBox.Show("Please select a gender.");
+                    return;
+                }
+                long contactNo = ContactNo(txtContactNo.Text);
+                if (contactNo == -1) return; 
+
+               
                 StudentInformationClass.SetFullName = $"{txtLastName.Text}, {txtFirstName.Text}, {txtMiddleInitial.Text}";
                 StudentInformationClass.SetStudentNo = StudentNumber(txtStudentNo.Text); 
                 StudentInformationClass.SetProgram = cbPrograms.Text;
@@ -75,7 +108,7 @@ namespace OrganizationProfile
             }
         }
 
-        /////return methods 
+
         public long StudentNumber(string studNum)
         {
             try
@@ -117,7 +150,7 @@ namespace OrganizationProfile
                 }
                 else
                 {
-                    throw new FormatException("Invalid contact number format. It should start with '+' followed by 9 to 13 digits.");
+                    throw new FormatException("Invalid contact number format. Please enter a valid number starting with +63 and followed by 9 digits.");
                 }
             }
             catch (FormatException ex)
@@ -136,34 +169,37 @@ namespace OrganizationProfile
             }
         }
 
-        public string FullName(string LastName, string FirstName, string MiddleInitial)
+        public string FullName(string lastName, string firstName, string middleInitial)
         {
             try
             {
-                if (string.IsNullOrEmpty(LastName) || string.IsNullOrEmpty(FirstName))
+                if (string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(firstName))
                 {
-                    throw new ArgumentNullException("Name fields cannot be empty.");
+                    throw new ArgumentNullException("First name and last name cannot be empty.");
                 }
 
-                if (Regex.IsMatch(LastName, @"^[a-zA-Z]+$") && Regex.IsMatch(FirstName, @"^[a-zA-Z]+$") && Regex.IsMatch(MiddleInitial, @"^[a-zA-Z]+$"))
+                if (!Regex.IsMatch(lastName, @"^[a-zA-Z]+$") || !Regex.IsMatch(firstName, @"^[a-zA-Z]+$"))
                 {
-                    _FullName = $"{LastName}, {FirstName}, {MiddleInitial}";
-                    return _FullName;
+                    throw new FormatException("First name and last name can only contain letters.");
                 }
-                else
+
+                if (!string.IsNullOrWhiteSpace(middleInitial) && !Regex.IsMatch(middleInitial, @"^[a-zA-Z]$"))
                 {
-                    throw new FormatException("Names can only contain letters.");
+                    throw new FormatException("Middle initial can only contain one letter.");
                 }
+
+                return $"{lastName}, {firstName}" +
+                       (string.IsNullOrWhiteSpace(middleInitial) ? "" : $", {middleInitial}");
             }
             catch (ArgumentNullException ex)
             {
                 MessageBox.Show("Error: " + ex.Message);
-                return string.Empty;  
+                return string.Empty;
             }
             catch (FormatException ex)
             {
                 MessageBox.Show("Error: " + ex.Message);
-                return string.Empty;  
+                return string.Empty;
             }
             finally
             {
